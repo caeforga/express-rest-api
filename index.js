@@ -66,6 +66,16 @@ app.put('/books/:id', (req, res) => {
     res.send(updatedBook);
 });
 
+app.delete('/books/:id', (req, res) => {
+    const data = readData();
+    const id = parseInt(req.params.id);
+    const book = data.books.find((book) => book.id === id);
+    const index = data.books.indexOf(book);
+    data.books.splice(index, 1);
+    writeData(data);
+    res.send(book);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port: ${PORT}`);
