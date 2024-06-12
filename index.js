@@ -1,16 +1,17 @@
 import express from "express";
-import fs, { write } from "fs";
+import fs from "fs";
 import bodyParser from "body-parser";
+import 'dotenv/config';
 
 const app = express();
+app.use(bodyParser.json());
 
 const readData = () => {
     try {
-        const data = fs.readFileSync("db.json", 'utf-8');
+        const data = fs.readFileSync("db.json");
         return JSON.parse(data);
     } catch (error) {
         console.log(error);
-        return [];
     }
 };
 
@@ -39,9 +40,8 @@ app.get('/books/:id', (req, res) => {
     res.send(book);
 });
 
-app.post('/books', async (req, res) => {
+app.post('/books', (req, res) => {
     const data = readData();
-    console.log(data);
     const body = req.body;
     console.log(body);
     const newBook = {
@@ -51,10 +51,22 @@ app.post('/books', async (req, res) => {
 
     data.books.push(newBook);
     writeData(data);
-    // fs.writeFileSync("db.json", JSON.stringify(data));
     res.send(newBook);
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000');
+app.put('/books/:id', (req, res) => {
+    const data = readData();
+    const id = parseInt(req.params.id);
+    const body = req.body;
+    const book = data.books.find((book) => book.id === id);
+    const index = data.books.indexOf(book);
+    const updatedBook = { ...book, ...body };
+    data.books[index] = updatedBook;
+    writeData(data);
+    res.send(updatedBook);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port: ${PORT}`);
 });
